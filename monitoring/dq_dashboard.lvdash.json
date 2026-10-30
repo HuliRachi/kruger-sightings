@@ -1,0 +1,208 @@
+{
+  "datasets": [
+    {
+      "name": "ebf0f358",
+      "displayName": "expectation",
+      "queryLines": [
+        "select * from dq_expectations_history;"
+      ],
+      "catalog": "dev",
+      "schema": "kruger"
+    },
+    {
+      "name": "13754813",
+      "displayName": "quarantined",
+      "queryLines": [
+        "select * from dq_quarantine_counts;"
+      ],
+      "catalog": "dev",
+      "schema": "kruger"
+    },
+    {
+      "name": "427499cb",
+      "displayName": "mismatch",
+      "queryLines": [
+        "select * from dq_layer_integrity;"
+      ],
+      "catalog": "dev",
+      "schema": "kruger"
+    }
+  ],
+  "pages": [
+    {
+      "name": "94d3a336",
+      "displayName": "Expectations",
+      "layout": [
+        {
+          "widget": {
+            "name": "feee3cfa",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ebf0f358",
+                  "fields": [
+                    {
+                      "name": "failed_records",
+                      "expression": "`failed_records`"
+                    },
+                    {
+                      "name": "passed_records",
+                      "expression": "`passed_records`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "failed_records",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "passed_records",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "9e8ce751",
+      "displayName": "Quarantined",
+      "layout": [
+        {
+          "widget": {
+            "name": "50f99c05",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "13754813",
+                  "fields": [
+                    {
+                      "name": "quarantined_count",
+                      "expression": "`quarantined_count`"
+                    },
+                    {
+                      "name": "checked_at",
+                      "expression": "`checked_at`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "quarantined_count"
+                  },
+                  {
+                    "fieldName": "checked_at"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 1,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "e03818c6",
+      "displayName": "Mismatch",
+      "layout": [
+        {
+          "widget": {
+            "name": "2fdc6706",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "427499cb",
+                  "fields": [
+                    {
+                      "name": "mismatched_records_count",
+                      "expression": "`mismatched_records_count`"
+                    },
+                    {
+                      "name": "monthly(checked_at)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `checked_at`)"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "mismatched_records_count"
+                  },
+                  {
+                    "fieldName": "monthly(checked_at)"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
