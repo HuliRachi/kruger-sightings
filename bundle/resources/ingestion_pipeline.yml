@@ -1,0 +1,20 @@
+resources:
+  pipelines:
+    kruger_ingestion_pipeline:
+      name: kruger-ingestion-pipeline
+      serverless: true
+      allow_duplicate_names: true
+      tags:
+        environment: ${bundle.target}
+ 
+      root_path: ${workspace.file_path}/pipelines/ingestion_pipeline
+ 
+      catalog: ${var.kruger_catalog}
+      schema: kruger
+ 
+      configuration:
+        kruger.catalog: ${var.kruger_catalog}
+ 
+      libraries:
+        - glob:
+            include: ../../pipelines/ingestion_pipeline/transformations/**

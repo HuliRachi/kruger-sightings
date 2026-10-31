@@ -1,0 +1,12 @@
+resources:
+  dashboards:
+    kruger_dq_dashboard:
+      display_name: "kruger DQ Dashboard"
+
+      file_path: ../../monitoring/dq_dashboard.lvdash.json
+
+      warehouse_id: ${var.kruger_warehouse_id}
+      
+      dataset_catalog: ${var.kruger_catalog}
+
+      dataset_schema: kruger
