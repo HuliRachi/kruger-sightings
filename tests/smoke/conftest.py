@@ -1,0 +1,67 @@
+import json
+import os
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+
+import pytest
+from databricks.sdk import WorkspaceClient
+
+# Dynamic path resolution to find the bundle directory relative to this file
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+BUNDLE_DIR = os.path.join(PROJECT_ROOT, "bundle")
+
+TARGET = "prod"
+ 
+@dataclass
+class ProdResourceIds:
+    kruger_pipeline_id: str
+    orchestration_job_id: str
+    warehouse_id: str
+ 
+ 
+@pytest.fixture(scope="session")
+def prod_resource_ids() -> ProdResourceIds:
+    """
+    Natively parses the production Databricks Asset Bundle deployment configurations
+    to align smoke tests with active cloud infrastructure variables.
+    """
+    result = subprocess.run(
+        ["databricks", "bundle", "summary", "--target", TARGET, "--output", "json"],
+        cwd=BUNDLE_DIR,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        pytest.fail(
+            f"`databricks bundle summary --target {TARGET}` failed — is the "
+            f"bundle actually deployed to {TARGET}?\n{result.stderr}"
+        )
+ 
+    brace_index = result.stdout.find("{")
+    if brace_index == -1:
+        pytest.fail(
+            f"`databricks bundle summary` produced no JSON at all — full stdout:\n{result.stdout}"
+        )
+    summary = json.loads(result.stdout[brace_index:])
+ 
+    try:
+        resources = summary["resources"]
+        return ProdResourceIds(
+            kruger_pipeline_id=resources["pipelines"]["kruger_pipeline"]["id"],
+            orchestration_job_id=resources["jobs"]["kruger_orchestration_job"]["id"],
+            warehouse_id=summary["variables"]["kruger_warehouse_id"]["value"],
+        )
+    except KeyError as e:
+        pytest.fail(
+            f"Unexpected `bundle summary` JSON shape — missing key {e}. "
+            f"Full output:\n{json.dumps(summary, indent=2)}"
+        )
+ 
+ 
+@pytest.fixture(scope="session")
+def workspace_client() -> WorkspaceClient:
+    """
+    Generates an authorized Databricks SDK WorkspaceClient instance.
+    """
+    return WorkspaceClient()
