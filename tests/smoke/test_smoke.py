@@ -48,3 +48,4 @@ def test_gold_tables_are_queryable(workspace_client, prod_resource_ids):
         )
         row_count = int(result.result.data_array[0][0])
         print(f"Verified {table}: Contains {row_count} records.")
+
