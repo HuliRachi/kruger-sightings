@@ -10,24 +10,30 @@ resources:
           default: "{{job.start_time.iso_date}}"
  
       tasks:
+        # Task 1: Run Ingestion DLT Pipeline (Bronze Layer)
         - task_key: run_ingestion
           pipeline_task:
             pipeline_id: ${resources.pipelines.kruger_ingestion_pipeline.id}
  
+        # Task 2: Data Quality Verification Audit Checks (Using your fixed report script)
         - task_key: dq_check
           depends_on:
             - task_key: run_ingestion
-          notebook_task:
-            notebook_path: ../../jobs/dq_check.ipynb
-            base_parameters:
-              catalog: ${var.kruger_catalog}
+          spark_python_task:
+            python_file: ../../jobs/report.py
+            parameters:
+              - "--catalog=${var.kruger_catalog}"
+              - "--run_date={{job.parameters.run_date}}"
+          environment_key: default
  
+        # Task 3: Run Transformation DLT Pipeline (Silver and Gold Layers)
         - task_key: run_transformation
           depends_on:
             - task_key: dq_check
           pipeline_task:
             pipeline_id: ${resources.pipelines.kruger_transformation_pipeline.id}
  
+        # Task 4: Lightweight Summary Report execution step
         - task_key: report
           depends_on:
             - task_key: run_transformation
