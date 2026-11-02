@@ -86,9 +86,13 @@ def test_orchestration_job_end_to_end(
     # 3. Synchronize generated files into Unity Catalog Staging Volumes
     _upload_batch_to_landing(workspace_client, batch_dir, catalog=catalog)
  
-    # 4. Programmatically run the Databricks Ingestion Job and await final result
+    # 4. Programmatically run the Databricks Ingestion Job, forcing the target catalog parameter
     run = workspace_client.jobs.run_now(
         job_id=int(uat_resource_ids.orchestration_job_id),
+        # FIX: Explicitly pass the active target catalog parameters to overwrite any cluster defaults
+        job_parameters={
+            "catalog": catalog
+        }
     ).result()
  
     assert run.state.result_state.value == "SUCCESS", (
