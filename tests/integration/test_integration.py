@@ -1,6 +1,7 @@
 import os
 import subprocess
 import pytest
+from datetime import datetime
 
 # Aligns directly with TOTAL_RECORDS = 15 configured inside your kruger data_generator.py file
 EXPECTED_LANDING_COUNTS = {
@@ -17,31 +18,32 @@ def _generate_fixed_seed_batch() -> str:
         text=True,
     )
     assert result.returncode == 0, f"data_generator.py execution failed:\n{result.stderr}"
-    # Direct the uploader up to the project root directory where batch_01 lives
+    # Returns the base generation folder where batch_01 resides
     return "../../batch_01"
 
 
 def _upload_batch_to_landing(workspace_client, batch_dir: str, catalog: str):
     """
-    Scans the local generated batch directory and syncs it to the 
-    Kruger Unity Catalog Staging Volume folder endpoint.
+    Scans the local generated batch directory and syncs it to a unique, 
+    dynamic landing subfolder to force Auto Loader ingestion.
     """
-    landing_root = f"/Volumes/{catalog}/kruger/staging"
+    # 🌟 HIGHLY OPTIMISED FOR AUTO LOADER: Generates a completely unique path timestamp suffix
+    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+    landing_root = f"/Volumes/{catalog}/kruger/staging/filtered_youtube/{run_id}"
     
-    if not os.path.exists(batch_dir):
-        raise FileNotFoundError(f"Target batch generation path not found: {batch_dir}")
+    local_source_folder = os.path.join(batch_dir, "filtered_youtube")
+    if not os.path.exists(local_source_folder):
+        raise FileNotFoundError(f"Target batch generation path not found: {local_source_folder}")
         
-    for folder in os.listdir(batch_dir):
-        local_folder = os.path.join(batch_dir, folder)
-        if not os.path.isdir(local_folder):
+    for filename in os.listdir(local_source_folder):
+        local_path = os.path.join(local_source_folder, filename)
+        if os.path.isdir(local_path):
             continue
             
-        for filename in os.listdir(local_folder):
-            local_path = os.path.join(local_folder, filename)
-            remote_path = f"{landing_root}/{folder}/{filename}"
-            
-            with open(local_path, "rb") as f:
-                workspace_client.files.upload(remote_path, f, overwrite=True)
+        remote_path = f"{landing_root}/{filename}"
+        
+        with open(local_path, "rb") as f:
+            workspace_client.files.upload(remote_path, f, overwrite=True)
 
 
 def _table_count_safe(workspace_client, catalog: str, warehouse_id: str, table: str) -> int:
@@ -86,14 +88,12 @@ def test_orchestration_job_end_to_end(
     # 3. Synchronize generated files into Unity Catalog Staging Volumes
     _upload_batch_to_landing(workspace_client, batch_dir, catalog=catalog)
  
-    # 4. Programmatically run the Databricks Ingestion Job, forcing full calculation refresh
+    # 4. Programmatically run the Databricks Ingestion Job using valid job parameter payloads
     run = workspace_client.jobs.run_now(
         job_id=int(uat_resource_ids.orchestration_job_id),
         job_parameters={
             "catalog": catalog
-        },
-        # 🌟 FORCES FULL REFRESH: Tells Delta Live Tables to wipe schema cache checkpoints and read the 15 records fresh
-        full_refresh=True
+        }
     ).result()
  
     assert run.state.result_state.value == "SUCCESS", (
