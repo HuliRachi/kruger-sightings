@@ -17,7 +17,7 @@ def _generate_fixed_seed_batch() -> str:
         text=True,
     )
     assert result.returncode == 0, f"data_generator.py execution failed:\n{result.stderr}"
-    # FIX: Direct the uploader up to the project root directory where batch_01 lives
+    # Direct the uploader up to the project root directory where batch_01 lives
     return "../../batch_01"
 
 
@@ -86,13 +86,17 @@ def test_orchestration_job_end_to_end(
     # 3. Synchronize generated files into Unity Catalog Staging Volumes
     _upload_batch_to_landing(workspace_client, batch_dir, catalog=catalog)
  
-    # 4. Programmatically run the Databricks Ingestion Job, forcing the target catalog parameter
+    # 4. Programmatically run the Databricks Ingestion Job, forcing both parameter types
     run = workspace_client.jobs.run_now(
         job_id=int(uat_resource_ids.orchestration_job_id),
-        # FIX: Explicitly pass the active target catalog parameters to overwrite any cluster defaults
+        # Handles Notebook-based tasks using dbutils.widgets
         job_parameters={
             "catalog": catalog
-        }
+        },
+        # Handles Python Script/JAR-based tasks using sys.argv command line parameters
+        python_script_parameters=[
+            f"--catalog={catalog}"
+        ]
     ).result()
  
     assert run.state.result_state.value == "SUCCESS", (
