@@ -5,6 +5,19 @@ resources:
       tags:
         environment: ${bundle.target}
  
+      # 1. Trigger schedule added for 18:00 and 21:00 daily
+      schedule:
+        quartz_cron_expression: "0 0 18,21 * * ?"
+        timezone_id: "Africa/Johannesburg"
+        pause_status: "UNPAUSED"
+
+      # 2. Email notifications added for success and failure
+      email_notifications:
+        on_success:
+          - "rachyhuly17@gmail.com"
+        on_failure:
+          - "rachyhuly17@gmail.com"
+
       parameters:
         - name: run_date
           default: "{{job.start_time.iso_date}}"
