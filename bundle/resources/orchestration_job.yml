@@ -5,13 +5,13 @@ resources:
       tags:
         environment: ${bundle.target}
  
-      # 1. Trigger schedule added for 18:00 and 21:00 daily
+      # Trigger schedule updated to run at 18:00 daily
       schedule:
-        quartz_cron_expression: "0 0 18,21 * * ?"
+        quartz_cron_expression: "0 0 18 * * ?"
         timezone_id: "Africa/Johannesburg"
         pause_status: "UNPAUSED"
 
-      # 2. Email notifications added for success and failure
+      # Email notifications added for success and failure
       email_notifications:
         on_success:
           - "rachyhuly17@gmail.com"
@@ -23,12 +23,28 @@ resources:
           default: "{{job.start_time.iso_date}}"
  
       tasks:
-        # Task 1: Run Ingestion DLT Pipeline (Bronze Layer)
+        # 🆕 New Task 1: Ingest Data to Landing (Notebook)
+        - task_key: ingest_to_landing
+          notebook_task:
+            notebook_path: ../../jobs/ingest_data_to_landing.ipynb
+          environment_key: default
+
+        # 🆕 New Task 2: Ingest Data to Staging (Notebook)
+        - task_key: ingest_to_staging
+          depends_on:
+            - task_key: ingest_to_landing
+          notebook_task:
+            notebook_path: ../../jobs/ingest_data_to_staging.ipynb
+          environment_key: default
+
+        # Task 3: Run Ingestion DLT Pipeline (Bronze Layer - now runs after staging ingestion)
         - task_key: run_ingestion
+          depends_on:
+            - task_key: ingest_to_staging
           pipeline_task:
             pipeline_id: ${resources.pipelines.kruger_ingestion_pipeline.id}
  
-        # Task 2: Data Quality Verification Audit Checks (Using your fixed report script)
+        # Task 4: Data Quality Verification Audit Checks
         - task_key: dq_check
           depends_on:
             - task_key: run_ingestion
@@ -39,14 +55,14 @@ resources:
               - "--run_date={{job.parameters.run_date}}"
           environment_key: default
  
-        # Task 3: Run Transformation DLT Pipeline (Silver and Gold Layers)
+        # Task 5: Run Transformation DLT Pipeline (Silver and Gold Layers)
         - task_key: run_transformation
           depends_on:
             - task_key: dq_check
           pipeline_task:
             pipeline_id: ${resources.pipelines.kruger_transformation_pipeline.id}
  
-        # Task 4: Lightweight Summary Report execution step
+        # Task 6: Lightweight Summary Report execution step
         - task_key: report
           depends_on:
             - task_key: run_transformation
