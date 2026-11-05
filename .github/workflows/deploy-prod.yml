@@ -62,6 +62,11 @@ jobs:
         working-directory: bundle
         run: databricks bundle run kruger_environment_bootstrap --target prod
 
+      # 🆕 Trigger your main 6-task orchestration pipeline
+      - name: Run main data orchestration job
+        working-directory: bundle
+        run: databricks bundle run kruger_orchestration_job --target prod
+
       - name: Run smoke tests
         working-directory: tests/smoke
         run: pytest test_smoke.py -v -s
