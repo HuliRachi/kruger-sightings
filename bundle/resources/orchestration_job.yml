@@ -23,18 +23,22 @@ resources:
           default: "{{job.start_time.iso_date}}"
  
       tasks:
-        # 🆕 New Task 1: Ingest Data to Landing (Notebook)
+        # Task 1: Ingest Data to Landing (Notebook)
         - task_key: ingest_to_landing
           notebook_task:
             notebook_path: ../../jobs/ingest_data_to_landing.ipynb
+            base_parameters:
+              catalog: ${var.kruger_catalog}
           environment_key: default
 
-        # 🆕 New Task 2: Ingest Data to Staging (Notebook)
+        # Task 2: Ingest Data to Staging (Notebook)
         - task_key: ingest_to_staging
           depends_on:
             - task_key: ingest_to_landing
           notebook_task:
             notebook_path: ../../jobs/ingest_data_to_staging.ipynb
+            base_parameters:
+              catalog: ${var.kruger_catalog}
           environment_key: default
 
         # Task 3: Run Ingestion DLT Pipeline (Bronze Layer - now runs after staging ingestion)
