@@ -33,7 +33,6 @@ BRONZE_QUARANTINE_PAIRS = [
     ("bronze_kruger_valid", "bronze_kruger_quarantined", "_ingested_at", "timestamp"),
 ]
  
-# Left empty because there is no Silver quarantine process configured yet
 SILVER_PAIRS = []
  
  

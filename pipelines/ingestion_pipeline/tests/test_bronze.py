@@ -2,7 +2,6 @@ import pytest
 from pyspark.sql import Row
 from pyspark.sql.functions import expr
 
-# --- Inline Logic Copied Directly From Your Notebook Pipeline Scripts ---
 def quarantine_rule(rules: dict) -> str:
     if not rules:
         raise ValueError("quarantine_rule() requires at least one rule — an empty dict would produce invalid SQL (\"NOT()\").")
@@ -14,7 +13,6 @@ KRUGER_RULES = {
 }
 
 
-# --- Unit Tests ---
 def test_quarantine_rule_combines_multiple_rules():
     """Verifies that multiple validation rules are grouped together safely with AND inside the NOT expression."""
     rules = {

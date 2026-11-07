@@ -21,10 +21,7 @@ class ProdResourceIds:
  
 @pytest.fixture(scope="session")
 def prod_resource_ids() -> ProdResourceIds:
-    """
-    Natively parses the production Databricks Asset Bundle deployment configurations
-    safely by dynamically scanning for active resource dictionary keys.
-    """
+    
     result = subprocess.run(
         ["databricks", "bundle", "summary", "--target", TARGET, "--output", "json"],
         cwd=BUNDLE_DIR,
