@@ -3,31 +3,23 @@ import subprocess
 import pytest
 from datetime import datetime
 
-# Aligns directly with TOTAL_RECORDS = 15 configured inside your kruger data_generator.py file
 EXPECTED_LANDING_COUNTS = {
     "kruger": 15,    
 }
 
 def _generate_fixed_seed_batch() -> str:
-    """
-    Executes your updated Kruger data generator via a CLI subprocess.
-    """
+    
     result = subprocess.run(
         ["python3", "../../data_generator.py"],
         capture_output=True,
         text=True,
     )
     assert result.returncode == 0, f"data_generator.py execution failed:\n{result.stderr}"
-    # Returns the base generation folder where batch_01 resides
     return "../../batch_01"
 
 
 def _upload_batch_to_landing(workspace_client, batch_dir: str, catalog: str):
-    """
-    Scans the local generated batch directory and syncs it to a unique, 
-    dynamic landing subfolder to force Auto Loader ingestion.
-    """
-    # 🌟 HIGHLY OPTIMISED FOR AUTO LOADER: Generates a completely unique path timestamp suffix
+ 
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
     landing_root = f"/Volumes/{catalog}/kruger/staging/filtered_youtube/{run_id}"
     
@@ -47,9 +39,7 @@ def _upload_batch_to_landing(workspace_client, batch_dir: str, catalog: str):
 
 
 def _table_count_safe(workspace_client, catalog: str, warehouse_id: str, table: str) -> int:
-    """
-    Queries Kruger table row metrics via the Databricks SQL Statement Execution API.
-    """
+   
     try:
         result = workspace_client.statement_execution.execute_statement(
             warehouse_id=warehouse_id,
@@ -68,27 +58,19 @@ def _table_count_safe(workspace_client, catalog: str, warehouse_id: str, table: 
 def test_orchestration_job_end_to_end(
     workspace_client, uat_resource_ids, reset_uat
 ):
-    """
-    Core End-to-End Integration Test for Kruger Pipeline:
-    Measures existing baseline records, runs data_generator.py, uploads output JSON lines,
-    triggers the DLT orchestration workflow, and asserts the records are successfully ingested.
-    """
+   
     catalog = "uat"
     
-    # 1. Capture current baseline state across your valid and quarantined splits
     initial_counts = {}
     for source in EXPECTED_LANDING_COUNTS.keys():
         v_count = _table_count_safe(workspace_client, catalog, uat_resource_ids.warehouse_id, f"bronze_{source}_valid")
         q_count = _table_count_safe(workspace_client, catalog, uat_resource_ids.warehouse_id, f"bronze_{source}_quarantined")
         initial_counts[source] = v_count + q_count
 
-    # 2. Run the programmatic data generation step 
     batch_dir = _generate_fixed_seed_batch()
     
-    # 3. Synchronize generated files into Unity Catalog Staging Volumes
     _upload_batch_to_landing(workspace_client, batch_dir, catalog=catalog)
  
-    # 4. Programmatically run the Databricks Ingestion Job using valid job parameter payloads
     run = workspace_client.jobs.run_now(
         job_id=int(uat_resource_ids.orchestration_job_id),
         job_parameters={
@@ -100,7 +82,6 @@ def test_orchestration_job_end_to_end(
         f"Master orchestration run failed: {run.state.state_message}"
     )
  
-    # 5. Verify the growth increments match expected rows precisely
     for source, expected_new_rows in EXPECTED_LANDING_COUNTS.items():
         valid = _table_count_safe(
             workspace_client, catalog, uat_resource_ids.warehouse_id, f"bronze_{source}_valid"

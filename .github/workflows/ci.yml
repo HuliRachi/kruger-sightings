@@ -32,6 +32,9 @@ jobs:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_UAT }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_UAT }}
       DATABRICKS_WAREHOUSE_ID_UAT: ${{ secrets.DATABRICKS_WAREHOUSE_ID_UAT }}
+      # MAP YOUTUBE CREDENTIALS FOR UAT TARGETS
+      BUNDLE_VAR_youtube_api_key: ${{ secrets.YOUTUBE_API_KEY }}
+      BUNDLE_VAR_youtube_channel_id: ${{ vars.YOUTUBE_CHANNEL_ID }}
     steps:
       - uses: actions/checkout@v4
 

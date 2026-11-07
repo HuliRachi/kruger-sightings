@@ -16,31 +16,23 @@ class UatResourceIds:
  
 @pytest.fixture(scope="session")
 def workspace_client() -> WorkspaceClient:
-    """
-    Generates an authorized Databricks SDK WorkspaceClient instance.
-    """
     return WorkspaceClient()
  
  
 @pytest.fixture(scope="session")
 def uat_resource_ids(workspace_client: WorkspaceClient) -> UatResourceIds:
-    """
-    Looks up deployment resource IDs natively using the Databricks Python SDK,
-    matching your exact kruger asset naming structures.
-    """
+
     pipeline_id = None
     orchestration_id = None
     warehouse_id = None
 
     try:
-        # Search for your Delta Live Tables Pipeline
         for p in workspace_client.pipelines.list_pipelines():
             name_lower = p.name.lower()
             if "pipeline" in name_lower and "kruger" in name_lower:
                 pipeline_id = p.pipeline_id
                 break
                 
-        # Search for your Multi-Task Orchestration Job
         for j in workspace_client.jobs.list():
             current_name = ""
             if hasattr(j, "settings") and j.settings and hasattr(j.settings, "name"):
@@ -53,7 +45,6 @@ def uat_resource_ids(workspace_client: WorkspaceClient) -> UatResourceIds:
                 orchestration_id = j.job_id
                 break
 
-        # Locate active SQL Warehouse ID to perform count queries
         for w in workspace_client.warehouses.list():
             if "warehouse" in w.name.lower() or "kruger" in w.name.lower():  
                 warehouse_id = w.id
@@ -77,7 +68,6 @@ def uat_resource_ids(workspace_client: WorkspaceClient) -> UatResourceIds:
         )
 
     if not warehouse_id:
-        # Default fallback warehouse token if list permissions are restrictive
         warehouse_id = "7ffa80bc21a73630"
 
     return UatResourceIds(
@@ -89,9 +79,7 @@ def uat_resource_ids(workspace_client: WorkspaceClient) -> UatResourceIds:
  
 @pytest.fixture(scope="function")
 def reset_uat(workspace_client: WorkspaceClient):
-    """
-    Cleans up landing volumes before test execution to isolate batch runs.
-    """
+ 
     catalog = TARGET  
     landing_root = f"/Volumes/{catalog}/kruger/staging"
     subfolders = ["filtered_youtube"]
