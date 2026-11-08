@@ -31,7 +31,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - uses: databricks/setup-cli@main
+      # FIXED: Swapped out for locked release tag to isolate and prevent 504 gateway failures
+      - uses: databricks/setup-cli@v1.23.0
 
       - name: Install smoke test dependencies
         run: pip install pytest databricks-sdk==0.67.0
