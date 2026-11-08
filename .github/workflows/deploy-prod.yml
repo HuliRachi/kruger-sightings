@@ -13,7 +13,6 @@ jobs:
     env:
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_PROD }}
       DATABRICKS_WAREHOUSE_ID_PROD: ${{ secrets.DATABRICKS_WAREHOUSE_ID_PROD }}
-      # MAP YOUTUBE CREDENTIALS FOR PROD TARGETS
       BUNDLE_VAR_youtube_api_key: ${{ secrets.YOUTUBE_API_KEY }}
       BUNDLE_VAR_youtube_channel_id: ${{ vars.YOUTUBE_CHANNEL_ID }}
     steps:
@@ -31,11 +30,9 @@ jobs:
         with:
           python-version: '3.12'
 
-      # FIXED: Swapped out for locked release tag to isolate and prevent 504 gateway failures
-      - uses: databricks/setup-cli@v1.23.0
-
-      - name: Install smoke test dependencies
-        run: pip install pytest databricks-sdk==0.67.0
+      # BYPASS DOWNLOAD OUTAGE: Install CLI via pip directly
+      - name: Install Databricks CLI and dependencies
+        run: pip install databricks-cli databricks-sdk==0.67.0 pytest
 
       - name: Ensure target catalog exists
         run: |

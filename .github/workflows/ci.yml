@@ -31,7 +31,6 @@ jobs:
     env:
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_UAT }}
       DATABRICKS_WAREHOUSE_ID_UAT: ${{ secrets.DATABRICKS_WAREHOUSE_ID_UAT }}
-      # MAP YOUTUBE CREDENTIALS FOR UAT TARGETS
       BUNDLE_VAR_youtube_api_key: ${{ secrets.YOUTUBE_API_KEY }}
       BUNDLE_VAR_youtube_channel_id: ${{ vars.YOUTUBE_CHANNEL_ID }}
     steps:
@@ -41,11 +40,9 @@ jobs:
         with:
           python-version: '3.12'
 
-      # FIXED: Swapped @main out for a locked version tag to prevent 504 server timeouts
-      - uses: databricks/setup-cli@v1.23.0
-
-      - name: Install SDK for catalog-ensure step
-        run: pip install databricks-sdk==0.67.0
+      # BYPASS DOWNLOAD OUTAGE: Install CLI via pip directly 
+      - name: Install Databricks CLI and SDK
+        run: pip install databricks-cli databricks-sdk==0.67.0
 
       - name: Ensure target catalog exists
         run: |
@@ -87,11 +84,9 @@ jobs:
         with:
           python-version: '3.12'
 
-      # FIXED: Swapped out for locked release tag to handle network proxy stability
-      - uses: databricks/setup-cli@v1.23.0
-
-      - name: Install test dependencies
-        run: pip install pytest faker databricks-sdk==0.67.0
+      # BYPASS DOWNLOAD OUTAGE: Install CLI via pip directly
+      - name: Install Databricks CLI and Test dependencies
+        run: pip install databricks-cli pytest faker databricks-sdk==0.67.0
 
       - name: Run integration tests
         working-directory: tests/integration
