@@ -30,7 +30,6 @@ jobs:
         with:
           python-version: '3.12'
 
-      # BYPASS DOWNLOAD OUTAGE: Install CLI via pip directly
       - name: Install Databricks CLI and dependencies
         run: pip install databricks-cli databricks-sdk==0.67.0 pytest
 
@@ -39,7 +38,8 @@ jobs:
           python3 -c "
           import os
           from databricks.sdk import WorkspaceClient
-          w = WorkspaceClient()
+          # FIXED: Host explicitly passed into WorkspaceClient for Prod environment
+          w = WorkspaceClient(host='https://dbc-c6a11b86-be1a.cloud.databricks.com/')
           resp = w.statement_execution.execute_statement(
               warehouse_id=os.environ['DATABRICKS_WAREHOUSE_ID_PROD'],
               statement='CREATE CATALOG IF NOT EXISTS prod',
