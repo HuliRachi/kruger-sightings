@@ -29,7 +29,6 @@ jobs:
     needs: unit-test
     runs-on: ubuntu-latest
     env:
-      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_UAT }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_UAT }}
       DATABRICKS_WAREHOUSE_ID_UAT: ${{ secrets.DATABRICKS_WAREHOUSE_ID_UAT }}
       # MAP YOUTUBE CREDENTIALS FOR UAT TARGETS
@@ -79,7 +78,6 @@ jobs:
     needs: validate-and-deploy-uat
     runs-on: ubuntu-latest
     env:
-      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_UAT }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_UAT }}
     steps:
       - uses: actions/checkout@v4
