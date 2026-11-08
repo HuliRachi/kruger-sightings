@@ -11,10 +11,9 @@ jobs:
   deploy-prod:
     runs-on: ubuntu-latest
     env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_PROD }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_PROD }}
       DATABRICKS_WAREHOUSE_ID_PROD: ${{ secrets.DATABRICKS_WAREHOUSE_ID_PROD }}
-      BUNDLE_VAR_youtube_api_key: ${{ secrets.YOUTUBE_API_KEY }}
-      BUNDLE_VAR_youtube_channel_id: ${{ vars.YOUTUBE_CHANNEL_ID }}
     steps:
       - name: Verify confirmation phrase
         run: |
@@ -40,7 +39,7 @@ jobs:
           python3 -c "
           import os
           from databricks.sdk import WorkspaceClient
-          w = WorkspaceClient(host='https://databricks.com')
+          w = WorkspaceClient()
           resp = w.statement_execution.execute_statement(
               warehouse_id=os.environ['DATABRICKS_WAREHOUSE_ID_PROD'],
               statement='CREATE CATALOG IF NOT EXISTS prod',

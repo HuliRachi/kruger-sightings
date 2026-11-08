@@ -26,8 +26,6 @@ resources:
             notebook_path: ../../jobs/ingest_data_to_landing.ipynb
             base_parameters:
               catalog: ${var.kruger_catalog}
-              youtube_api_key: ${var.youtube_api_key}
-              youtube_channel_id: ${var.youtube_channel_id}
           environment_key: default
 
         - task_key: ingest_to_staging
