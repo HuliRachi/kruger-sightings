@@ -31,7 +31,6 @@ jobs:
     env:
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_UAT }}
       DATABRICKS_WAREHOUSE_ID_UAT: ${{ secrets.DATABRICKS_WAREHOUSE_ID_UAT }}
-      # MAP YOUTUBE CREDENTIALS FOR UAT TARGETS
       BUNDLE_VAR_youtube_api_key: ${{ secrets.YOUTUBE_API_KEY }}
       BUNDLE_VAR_youtube_channel_id: ${{ vars.YOUTUBE_CHANNEL_ID }}
     steps:
@@ -41,18 +40,18 @@ jobs:
         with:
           python-version: '3.12'
 
-      # FIXED: Uses the raw standalone installer script to guarantee the new bundle-supported CLI is added
-      - name: Install New Databricks CLI and SDK
-        run: |
-          curl -fsSL https://githubusercontent.com | sh
-          pip install databricks-sdk==0.67.0
+      # Returning to the native action, which handles all PATH setup automatically
+      - uses: databricks/setup-cli@main
+
+      - name: Install SDK for catalog-ensure step
+        run: pip install databricks-sdk==0.67.0
 
       - name: Ensure target catalog exists
         run: |
           python3 -c "
           import os
           from databricks.sdk import WorkspaceClient
-          w = WorkspaceClient(host='https://dbc-7719d447-7a09.cloud.databricks.com/')
+          w = WorkspaceClient(host='https://databricks.com')
           resp = w.statement_execution.execute_statement(
               warehouse_id=os.environ['DATABRICKS_WAREHOUSE_ID_UAT'],
               statement='CREATE CATALOG IF NOT EXISTS uat',
@@ -87,11 +86,10 @@ jobs:
         with:
           python-version: '3.12'
 
-      # FIXED: Uses the raw standalone installer script to guarantee the new bundle-supported CLI is added
-      - name: Install New Databricks CLI and Test dependencies
-        run: |
-          curl -fsSL https://githubusercontent.com | sh
-          pip install pytest faker databricks-sdk==0.67.0
+      - uses: databricks/setup-cli@main
+
+      - name: Install test dependencies
+        run: pip install pytest faker databricks-sdk==0.67.0
 
       - name: Run integration tests
         working-directory: tests/integration
