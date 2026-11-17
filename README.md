@@ -90,12 +90,11 @@ These tests run instantly by reusing the existing Databricks runtime context wit
 ### 2. End-to-End Integration Tests (`test_integration.py`)
 A true infrastructure-integrated check that tests all system mechanics together:
 1. Calls `data_generator.py` locally via an internal subprocess to create 15 fresh, realistic animal sightings records.
+2. Interacts with the `WorkspaceClient` API to upload the file to your active Unity Catalog staging volume (`/Volumes/uat/kruger/staging/filtered_youtube/`).
+3. Dispatches an API run command to trigger the master Databricks Orchestration Job (`run_now`).
+4. Blocks execution while monitoring cloud components as they process the data.
+5. Connects via the SQL Statement API to verify your table volume grows by exactly 15 records.
+---
 
 Built and designed by Hulisani Ratshiedana  
 **Contact:** rachyhuly17@gmail.com
-3. Interacts with the `WorkspaceClient` API to upload the file to your active Unity Catalog staging volume (`/Volumes/uat/kruger/staging/filtered_youtube/`).
-4. Dispatches an API run command to trigger the master Databricks Orchestration Job (`run_now`).
-5. Blocks execution while monitoring cloud components as they process the data.
-6. Connects via the SQL Statement API to verify your table volume grows by exactly 15 records.
-
----
