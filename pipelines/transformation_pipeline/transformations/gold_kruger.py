@@ -3,7 +3,7 @@ from pyspark.sql.functions import col, month
 
 @dp.materialized_view(
     name="gold_kruger_jan_to_jun",
-    comment="Pre-computed behavioral metrics for events published in the first half of the year (January - June)."
+    comment="Pre-computed behavioral metrics for events published January - June."
 )
 def gold_kruger_jan_to_jun():
     return (
@@ -13,7 +13,7 @@ def gold_kruger_jan_to_jun():
 
 @dp.materialized_view(
     name="gold_kruger_jul_to_dec",
-    comment="Pre-computed behavioral metrics for events published in the second half of the year (July - December)."
+    comment="Pre-computed behavioral metrics for events published July - December."
 )
 def gold_kruger_jul_to_dec():
     return (
