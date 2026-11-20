@@ -1,8 +1,7 @@
-from pyspark import pipelines as dp 
+from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 from pyspark.sql.types import StructType, StructField, StringType
-
-from utilities.helpers import get_staging_path, get_catalog
+from utilities.helpers import get_staging_path
 
 KRUGER_SCHEMA = StructType([
     StructField("title", StringType(), True),
