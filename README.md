@@ -1,7 +1,7 @@
 # Kruger National Park Latest Sightings Data Pipeline
 
 An end-to-end data platform built on **Databricks Delta Live Tables (DLT)** and orchestrations using the **Medallion Architecture**.
-This project pull data like (viewcount, likecount, commentcount) from a youtube channel called Latest Sightings.
+This project pull data like (viewcount, likecount, commentcount) from a youtube channel called LatestSightings.
 
 ---
 
