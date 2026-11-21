@@ -5,23 +5,18 @@ This project pull data like (viewcount, likecount, commentcount) from a youtube 
 
 ---
 
-### Architectural Overview (Medallion Layers)
-
-*   **Ingestion Staging** (`/Volumes/uat/kruger/staging/filtered_youtube/`)
-    *   **Bronze Layer** (`bronze_kruger`)
-        *   **Quarantined** (`bronze_kruger_quarantined`) - *Records with missing IDs or live content*
-        *   **Validated** (`bronze_kruger_valid`) - *Records passing all quality checks*
-            *   **Silver Layer** (`silver_kruger`) - *Clean data cast to timestamps and integers*
-                *   **Gold H1** (`gold_kruger_jan_to_jun`) - *Pre-computed views for January to June*
-                *   **Gold H2** (`gold_kruger_jul_to_dec`) - *Pre-computed views for July to December*
-
 ### Data Flow Breakdown
 1. **Staging / Ingestion:** Raw JSON strings are continually written to Unity Catalog Volumes from upstream YouTube data harvesting engines.
 2. **Bronze Layer (`bronze_kruger`):** Establishes an explicit string-based catalog schema tracking metrics (`view_count`, `comment_count`, etc.) and appends processing audit metadata (`_ingested_at`, `_source_file`).
 3. **Data Quality Quarantine:** Isolates records using declarative business rules. Bad records (e.g., live feeds or missing IDs) route to `bronze_kruger_quarantined`, while clean data routes to `bronze_kruger_valid`.
+<img src="images/ingestion_pipeline.png" alt="Ingest Pipeline" width="400" height="150">
 4. **Silver Layer (`silver_kruger`):** Drops temporary debugging flags, enforces data type casting, converts metrics into `long` integers, and structures `published_at` fields into true `timestamp` rows.
 5. **Gold Layer:** Semi-annually divides the clean operational tracking data into optimized, BI-ready materialized views separated by half-year publication cycles (**H1: January–June** vs. **H2: July–December**).
-
+<img src="images/transform_pipeline.png" alt="Transform Pipeline" width="400" height="150">
+6. **Orchestration:** Job for orchestrating pipeline from ingesting data to landing zone, staging zone, bronze, silver, gold, data quality and report.
+<img src="images/orchestration_job.png" alt="Transform Pipeline" width="400" height="150">
+7. **Bootstrap Job:** Job for orchestrating pipeline for alert hooks, dashboard, ingestion and trsnsformation.
+<img src="images/orchestration_job.png" alt="Transform Pipeline" width="400" height="150">
 ---
 
 ## Project Directory Tree
@@ -59,6 +54,11 @@ kruger-sightings/
 
 ---
 
+### PowerBI Dashboard Analysis
+
+<img src="images/Jan-Jun.png" alt="PowerBI_Dashboard" width="700" height="350">
+<img src="images/Jul-Dec.png" alt="PowerBI_Dashboard" width="700" height="350">
+
 ## Data Quality Rule Framework
 
 The pipeline guards data reliability by verifying all inbound files against explicit `KRUGER_RULES`:
@@ -73,6 +73,9 @@ KRUGER_RULES = {
 * **`bronze_kruger_valid`:** Captures every record passing all conditions.
 * **`bronze_kruger_quarantined`:** Automatically traps records where `id` is missing or the video corresponds to an active stream (`live_broadcast_content == 'live'`), preventing pollution of downstream analytics.
 
+### Email Notification on failure and success
+
+<img src="images/email_notification.png" alt="EmailNotification" width="700" height="350">
 ---
 
 ## Testing Lifecycle Framework
