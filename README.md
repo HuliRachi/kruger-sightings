@@ -19,7 +19,7 @@ This project pull data like (viewcount, likecount, commentcount) from a youtube 
 6. **Orchestration:** Job for orchestrating pipeline from ingesting data to landing zone, staging zone, bronze, silver, gold, data quality and report.
 <img src="images/orchestration_job.png" alt="Transform Pipeline" width="400" height="150">
 7. **Bootstrap Job:** Job for orchestrating pipeline for alert hooks, dashboard, ingestion and trsnsformation.
-<img src="images/orchestration_job.png" alt="Transform Pipeline" width="400" height="150">
+<img src="images/bootstrap_job.png" alt="Transform Pipeline" width="400" height="150">
 ---
 
 ## Project Directory Tree
