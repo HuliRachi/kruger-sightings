@@ -4,22 +4,22 @@ resources:
       name: kruger-orchestration-job
       tags:
         environment: ${bundle.target}
-
+ 
       schedule:
         quartz_cron_expression: "0 0 18 ? * MON,FRI"
         timezone_id: "Africa/Johannesburg"
-        pause_status: ${var.schedule_pause_status}
+        pause_status: "UNPAUSED"
 
       email_notifications:
         on_success:
-          - ${var.notification_email}
+          - "rachyhuly17@gmail.com"
         on_failure:
-          - ${var.notification_email}
+          - "rachyhuly17@gmail.com"
 
       parameters:
         - name: run_date
           default: "{{job.start_time.iso_date}}"
-
+ 
       tasks:
         - task_key: ingest_to_landing
           notebook_task:
@@ -42,7 +42,7 @@ resources:
             - task_key: ingest_to_staging
           pipeline_task:
             pipeline_id: ${resources.pipelines.kruger_ingestion_pipeline.id}
-
+ 
         - task_key: dq_check
           depends_on:
             - task_key: run_ingestion
@@ -52,13 +52,13 @@ resources:
               - "--catalog=${var.kruger_catalog}"
               - "--run_date={{job.parameters.run_date}}"
           environment_key: default
-
+ 
         - task_key: run_transformation
           depends_on:
             - task_key: dq_check
           pipeline_task:
             pipeline_id: ${resources.pipelines.kruger_transformation_pipeline.id}
-
+ 
         - task_key: report
           depends_on:
             - task_key: run_transformation
@@ -68,7 +68,7 @@ resources:
               - "--catalog=${var.kruger_catalog}"
               - "--run_date={{job.parameters.run_date}}"
           environment_key: default
-
+          
       environments:
         - environment_key: default
           spec:
