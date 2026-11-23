@@ -22,20 +22,32 @@ variables:
   kruger_warehouse_id:
     description: "SQL warehouse ID the DQ dashboard queries run against. No sensible default — set per target below."
     default: "7ffa80bc21a73630"
+  schedule_pause_status:
+    description: "Controls whether the orchestration job schedule is PAUSED or UNPAUSED per environment."
+    default: "PAUSED"
+  notification_email:
+    description: "Email address for job success/failure alerts."
+    default: "rachyhuly17@gmail.com"
 
 targets:
   dev:
+    mode: development
     default: true
     workspace:
       host: https://dbc-7719d447-7a09.cloud.databricks.com/
+
   uat:
     workspace:
       host: https://dbc-7719d447-7a09.cloud.databricks.com/
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/uat
     variables:
       kruger_catalog: uat
+
   prod:
+    mode: production
     workspace:
       host: https://dbc-c6a11b86-be1a.cloud.databricks.com/
     variables:
       kruger_catalog: prod
       kruger_warehouse_id: e3d4bc3a4cc4b6e3
+      schedule_pause_status: "UNPAUSED"
